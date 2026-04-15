@@ -2,6 +2,8 @@
 
 ![ETFScreener screenshot](Code/ETFScreener.png)
 
+If you do not want to generate your own copy, just download `ETFScreener.html` and open it locally in your browser.
+
 This repository generates a static HTML ETF screener from the full Nasdaq ETF universe.
 
 The generator code lives in `Code\GenerateETFScreener.ts`. The main output, `ETFScreener.html`, is self-contained: you can open it directly in a browser with no local server, build step, or extra update required.
