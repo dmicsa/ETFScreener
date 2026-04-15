@@ -47,7 +47,7 @@ The generator defaults now write to these root-level files:
 ## Files In This Repo
 
 - `Code\GenerateETFScreener.ts`: the generator script
-- `Code\Info.txt`: the visible name/version/copyright line used in the first hero box and browser title
+- `Code\Info.md`: the visible name/version/copyright line used in the first hero box and browser title
 - `Code\ETFScreener.png`: the screenshot shown at the top of this README
 - `GenerateETFScreener.bat`: root wrapper for generating the screener
 - `ETFScreener.html`: current full generated screener

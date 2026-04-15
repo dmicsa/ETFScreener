@@ -70,7 +70,7 @@ type CachedEnrichment = {
 
 const OUTPUT_PATH = "./ETFScreener.html";
 const CACHE_PATH = "./Code/cache.json";
-const INFO_PATH = "./Code/Info.txt";
+const INFO_PATH = "./Code/Info.md";
 const CACHE_VERSION = 4;
 const NASDAQ_ETF_SCREENER_URL = "https://api.nasdaq.com/api/screener/etf?download=true";
 const QUOTE_BATCH_SIZE = 100;
@@ -805,13 +805,29 @@ function formatGeneratedAt(date: Date): string {
 }
 
 function extractDocumentTitle(infoText: string): string {
-  const [title] = infoText.split(",", 1);
+  const plainInfoText = stripInfoLinks(infoText);
+  const [title] = plainInfoText.split(",", 1);
   return title?.trim() || "ETFScreener";
+}
+
+function stripInfoLinks(infoText: string): string {
+  return infoText.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, "$1");
+}
+
+function renderInfoText(infoText: string): string {
+  return infoText.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, (_match, label: string, url: string) => {
+    return '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(label) + '</a>';
+  }).split(/(<a [^>]+>.*?<\/a>)/).map((part) => {
+    if (part.startsWith("<a ")) {
+      return part;
+    }
+    return escapeHtml(part);
+  }).join("");
 }
 
 function renderHtml(rows: FlatEtfRow[], generatedAt: string, infoText: string): string {
   const jsonRows = JSON.stringify(rows).replace(/</g, "\\u003c");
-  const heroTitle = escapeHtml(infoText);
+  const heroTitle = renderInfoText(infoText);
   const documentTitle = escapeHtml(extractDocumentTitle(infoText));
 
   return `<!DOCTYPE html>
@@ -891,6 +907,15 @@ function renderHtml(rows: FlatEtfRow[], generatedAt: string, infoText: string): 
       line-height: 1.02;
       color: #000000;
       font-weight: 700;
+    }
+
+    .kicker a {
+      color: #0b3d91;
+      text-decoration: underline;
+    }
+
+    .kicker a:hover {
+      text-decoration-thickness: 2px;
     }
 
     h1 {
