@@ -2,7 +2,7 @@
 
 ![ETFScreener screenshot](Code/ETFScreener.png)
 
-If you do not want to generate your own copy, just download `ETFScreener.html` and open it locally in your browser.
+If you do not want to generate your own copy, just download `ETFScreener.html` and open it locally in your browser, or even easies use [this link](https://htmlpreview.github.io/?https://github.com/dmicsa/ETFScreener/blob/main/ETFScreener.html).
 
 This repository generates a static HTML ETF screener from the full Nasdaq ETF universe.
 
@@ -44,7 +44,7 @@ The generator defaults now write to these root-level files:
 
 - `--output=<path>`: output HTML file
 - `--cache=<path>`: JSON cache used for enriched ETF data
-- `--symbols=SPY,VOO,QQQ`: optional ticker subset; omit this flag to process the full universe
+- `--symbols=SPY,VOO,QQQ`: optional ticker subset; commas, spaces, tabs, new lines, and other non-ticker separators are all accepted
 
 ## Files In This Repo
 
@@ -59,7 +59,7 @@ The generator defaults now write to these root-level files:
 
 The generated page is a single self-contained HTML file with embedded ETF data and client-side controls. It includes:
 
-- search by ticker, fund name, category, or sponsor
+- a Universe box for optional ticker subsets; it accepts mixed separators, removes duplicates, and normalizes the list in ETF-name order
 - minimum and maximum AUM filters
 - 1Y, 3Y, 5Y, and 10Y filters for annualized return, standard deviation, and Sharpe ratio
 - sponsor and ETF names cleaned for readability by removing duplicated sponsor prefixes and common ETF label noise

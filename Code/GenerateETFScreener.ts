@@ -528,12 +528,7 @@ function parseArgs(args: string[]): CliOptions {
     }
     if (arg.startsWith("--symbols=")) {
       const rawSymbols = arg.slice("--symbols=".length);
-      symbols = new Set(
-        rawSymbols
-          .split(",")
-          .map((value) => value.trim().toUpperCase())
-          .filter((value) => value.length > 0),
-      );
+      symbols = new Set(parseTickerSymbols(rawSymbols));
     }
   }
 
@@ -544,10 +539,15 @@ function parseArgs(args: string[]): CliOptions {
   };
 }
 
+function parseTickerSymbols(rawValue: string): string[] {
+  const matches = rawValue.match(/[A-Za-z0-9._-]+/g) ?? [];
+  return [...new Set(matches.map((value) => value.trim().toUpperCase()).filter((value) => value.length > 0))];
+}
+
 async function readInfoText(path: string): Promise<string> {
   try {
     const text = await Deno.readTextFile(path);
-    return text.trim() || "ETFScreener";
+    return normalizeInfoMarkdown(text) || "ETFScreener";
   } catch (error) {
     if (error instanceof Deno.errors.NotFound) {
       return "ETFScreener";
@@ -555,6 +555,32 @@ async function readInfoText(path: string): Promise<string> {
 
     throw error;
   }
+}
+
+function normalizeInfoMarkdown(text: string): string {
+  const trimmed = text.trim();
+  if (!trimmed) {
+    return "";
+  }
+
+  const lines = trimmed
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+
+  if (lines.length === 0) {
+    return "";
+  }
+
+  const firstLine = lines[0];
+  const headingMatch = firstLine.match(/^#\s+(.+)$/);
+  if (!headingMatch) {
+    return lines.join(" ");
+  }
+
+  const heading = headingMatch[1].trim();
+  const remainder = lines.slice(1).join(" ");
+  return remainder ? `${heading}, ${remainder}` : heading;
 }
 
 async function readCache(path: string): Promise<Record<string, CachedEnrichment>> {
@@ -1356,11 +1382,11 @@ function renderHtml(rows: FlatEtfRow[], generatedAt: string, infoText: string): 
 
       <div class="control-grid">
         <div class="control-card">
-          <h3>Universe and Search</h3>
+          <h3>Universe</h3>
           <div class="field-row">
             <div class="field full">
-              <label for="searchFilter">Search</label>
-              <input id="searchFilter" type="search" placeholder="Ticker, fund name, category, sponsor">
+              <label for="searchFilter">Universe</label>
+              <input id="searchFilter" type="search" placeholder="Paste tickers with any separators: SPY, VOO QQQ">
             </div>
             <div class="field">
               <label for="aumMin">AUM Min ($B)</label>
@@ -1512,6 +1538,21 @@ function renderHtml(rows: FlatEtfRow[], generatedAt: string, infoText: string): 
     function bindControls() {
       RENDER_INPUT_IDS.forEach((id) => {
         const element = document.getElementById(id);
+        if (id === "searchFilter") {
+          element.addEventListener("input", () => {
+            if (parseUniverseSymbols(element.value).length > 0) {
+              state.sortKey = "name";
+              state.sortAsc = true;
+              renderHeader();
+            }
+            render();
+          });
+          element.addEventListener("change", () => {
+            normalizeUniverseFilterValue();
+          });
+          return;
+        }
+
         element.addEventListener("input", render);
         element.addEventListener("change", render);
       });
@@ -1539,6 +1580,54 @@ function renderHtml(rows: FlatEtfRow[], generatedAt: string, infoText: string): 
       document.getElementById("copyTableTsv").addEventListener("click", async () => {
         await copyTable(getVisibleRows(), "\t");
       });
+    }
+
+    function parseUniverseSymbols(rawValue) {
+      const matches = String(rawValue ?? "").match(/[A-Za-z0-9._-]+/g) ?? [];
+      return [...new Set(matches.map((value) => value.trim().toUpperCase()).filter(Boolean))];
+    }
+
+    function normalizeUniverseFilterValue() {
+      const element = document.getElementById("searchFilter");
+      const normalized = formatUniverseSymbols(element.value).join(", ");
+      element.value = normalized;
+      if (normalized) {
+        state.sortKey = "name";
+        state.sortAsc = true;
+        renderHeader();
+      }
+      render();
+    }
+
+    function formatUniverseSymbols(rawValue) {
+      const requested = parseUniverseSymbols(rawValue);
+      if (requested.length === 0) {
+        return [];
+      }
+
+      const rowsBySymbol = new Map(DATA.map((row) => [row.symbol, row]));
+      const matched = [];
+      const unmatched = [];
+
+      requested.forEach((symbol) => {
+        if (rowsBySymbol.has(symbol)) {
+          matched.push(symbol);
+        } else {
+          unmatched.push(symbol);
+        }
+      });
+
+      matched.sort((left, right) => {
+        const leftRow = rowsBySymbol.get(left);
+        const rightRow = rowsBySymbol.get(right);
+        const leftName = String(leftRow?.name ?? left);
+        const rightName = String(rightRow?.name ?? right);
+        return leftName.localeCompare(rightName) || left.localeCompare(right);
+      });
+
+      unmatched.sort((left, right) => left.localeCompare(right));
+
+      return [...matched, ...unmatched];
     }
 
     function restorePersistedViewState() {
@@ -1716,19 +1805,14 @@ function renderHtml(rows: FlatEtfRow[], generatedAt: string, infoText: string): 
 
     function getFilteredRows() {
       const rows = getRowsWithAdjustedSharpe();
-      const search = document.getElementById("searchFilter").value.trim().toLowerCase();
+      const universeSymbols = parseUniverseSymbols(document.getElementById("searchFilter").value);
+      const universeSet = new Set(universeSymbols);
       const aumMin = getNumericFilter("aumMin");
       const aumMax = getNumericFilter("aumMax");
 
       return rows.filter((row) => {
-        if (search) {
-          const haystack = [row.symbol, row.name, row.category, row.sponsor]
-            .filter(Boolean)
-            .join(" ")
-            .toLowerCase();
-          if (!haystack.includes(search)) {
-            return false;
-          }
+        if (universeSet.size > 0 && !universeSet.has(row.symbol)) {
+          return false;
         }
 
         if (!withinRange(row.aumBillions, aumMin, aumMax)) {
@@ -1789,8 +1873,9 @@ function renderHtml(rows: FlatEtfRow[], generatedAt: string, infoText: string): 
 
     function updateActiveFilters() {
       const active = [];
-      if (document.getElementById("searchFilter").value.trim()) {
-        active.push("Search: " + document.getElementById("searchFilter").value.trim());
+      const universeFilter = formatUniverseSymbols(document.getElementById("searchFilter").value).join(", ");
+      if (universeFilter) {
+        active.push("Universe: " + universeFilter);
       }
       RENDER_INPUT_IDS
         .filter((id) => id !== "searchFilter")
