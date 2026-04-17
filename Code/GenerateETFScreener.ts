@@ -880,6 +880,8 @@ function renderHtml(rows: FlatEtfRow[], generatedAt: string, infoText: string): 
       --shadow: 0 18px 40px rgba(30, 41, 59, 0.08);
       --text-size: 16px;
       --section-heading-size: 18px;
+      --cell-empty-bg: rgba(255,255,255,0.72);
+      --cell-text-shadow: 0 1px 0 rgba(255,255,255,.35);
     }
 
     * { box-sizing: border-box; }
@@ -888,6 +890,7 @@ function renderHtml(rows: FlatEtfRow[], generatedAt: string, infoText: string): 
       font-family: system-ui, sans-serif;
       font-size: var(--text-size);
       color: var(--ink);
+      transition: background 140ms ease, color 140ms ease;
       background:
         radial-gradient(circle at top left, rgba(144, 190, 109, 0.18), transparent 28%),
         radial-gradient(circle at top right, rgba(190, 122, 95, 0.14), transparent 22%),
@@ -921,12 +924,21 @@ function renderHtml(rows: FlatEtfRow[], generatedAt: string, infoText: string): 
     }
 
     .hero-card {
+      position: relative;
       padding: 28px 28px 24px;
       background: linear-gradient(145deg, rgba(255,255,255,0.96), rgba(248,250,246,0.82));
     }
 
+    .hero-card .theme-toggle {
+      position: absolute;
+      top: 28px;
+      right: 28px;
+      z-index: 1;
+    }
+
     .kicker {
       margin: 0 0 10px;
+      padding-right: 148px;
       text-transform: none;
       letter-spacing: normal;
       font-size: clamp(1.02rem, 1.92vw, 1.68rem);
@@ -1071,6 +1083,20 @@ function renderHtml(rows: FlatEtfRow[], generatedAt: string, infoText: string): 
       background: white;
       color: var(--ink);
       border: 1px solid var(--line);
+    }
+
+    button.theme-toggle {
+      background: rgba(255,255,255,0.92);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    button.theme-toggle[aria-pressed="true"] {
+      background: var(--accent);
+      color: white;
+      border-color: transparent;
     }
 
     .control-grid {
@@ -1312,8 +1338,94 @@ function renderHtml(rows: FlatEtfRow[], generatedAt: string, infoText: string): 
       padding-left: 18px;
     }
 
+    body[data-theme="dark"] {
+      --bg: #0b1220;
+      --panel: rgba(15,23,42,0.86);
+      --panel-strong: #101826;
+      --ink: #f8fafc;
+      --muted: #d7e0ea;
+      --line: #334155;
+      --accent: #2c6a56;
+      --accent-soft: #15202d;
+      --row-bg: rgba(17,24,39,0.82);
+      --row-hover-bg: rgba(24,34,49,0.96);
+      --row-hover-overlay: rgba(148,163,184,0.14);
+      --shadow: 0 20px 44px rgba(2, 6, 23, 0.38);
+      --cell-empty-bg: rgba(17,24,39,0.82);
+      --cell-text-shadow: none;
+      background:
+        radial-gradient(circle at top left, rgba(76, 120, 168, 0.22), transparent 24%),
+        radial-gradient(circle at top right, rgba(16, 185, 129, 0.16), transparent 20%),
+        linear-gradient(180deg, #020617 0%, #0b1220 100%);
+    }
+
+    body[data-theme="dark"] .hero-card,
+    body[data-theme="dark"] .summary-card,
+    body[data-theme="dark"] .controls-card,
+    body[data-theme="dark"] .table-card,
+    body[data-theme="dark"] .method-card {
+      border-color: rgba(148,163,184,0.18);
+    }
+
+    body[data-theme="dark"] .hero-card {
+      background: linear-gradient(145deg, rgba(15,23,42,0.96), rgba(17,24,39,0.86));
+    }
+
+    body[data-theme="dark"] .kicker {
+      color: var(--ink);
+    }
+
+    body[data-theme="dark"] .kicker a,
+    body[data-theme="dark"] td.symbol a {
+      color: #8ebcf5;
+    }
+
+    body[data-theme="dark"] .pill {
+      background: rgba(15,23,42,0.92);
+    }
+
+    body[data-theme="dark"] button.secondary,
+    body[data-theme="dark"] button.theme-toggle {
+      background: rgba(15,23,42,0.92);
+      color: var(--ink);
+      border-color: var(--line);
+    }
+
+    body[data-theme="dark"] button.theme-toggle[aria-pressed="true"] {
+      background: var(--accent);
+      color: white;
+      border-color: transparent;
+    }
+
+    body[data-theme="dark"] input,
+    body[data-theme="dark"] select {
+      background: #0f172a;
+    }
+
+    body[data-theme="dark"] .field.is-active input,
+    body[data-theme="dark"] .field.is-active select {
+      background: #182334;
+    }
+
+    body[data-theme="dark"] input:focus,
+    body[data-theme="dark"] select:focus {
+      outline-color: rgba(108, 165, 138, 0.24);
+      border-color: #6ca58a;
+    }
+
+    body[data-theme="dark"] thead th {
+      background: #162130;
+    }
+
+    body[data-theme="dark"] thead th:hover {
+      background: #1f3044;
+    }
+
+    body[data-theme="dark"] tbody td {
+      border-bottom-color: rgba(51, 65, 85, 0.82);
+    }
+
     @media (max-width: 1280px) {
-      .hero,
       .control-grid,
       .horizon-grid {
         grid-template-columns: 1fr;
@@ -1323,6 +1435,12 @@ function renderHtml(rows: FlatEtfRow[], generatedAt: string, infoText: string): 
         padding-inline: 16px;
       }
     }
+
+    @media (max-width: 1100px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1330,6 +1448,7 @@ function renderHtml(rows: FlatEtfRow[], generatedAt: string, infoText: string): 
     <section class="hero">
       <div class="hero-card">
         <p class="kicker">${heroTitle}</p>
+        <button type="button" class="theme-toggle" id="themeToggle" aria-pressed="false">Dark mode</button>
         <p class="hero-copy">Filter the ETF universe with live risk, return, and rating controls.</p>
         <p class="lead">
           The table below starts from the full Nasdaq ETF screener universe, then keeps only funds with at least $0.5B AUM,
@@ -1374,8 +1493,8 @@ function renderHtml(rows: FlatEtfRow[], generatedAt: string, infoText: string): 
         <div class="button-row">
           <button type="button" id="copyTickersCsv">Copy filtered tickers as CSV</button>
           <button type="button" id="copyTickersTsv">Copy filtered tickers as TSV</button>
-          <button type="button" id="copyTableCsv">Copy all table as CSV</button>
-          <button type="button" id="copyTableTsv">Copy all table as TSV</button>
+          <button type="button" id="copyTableCsv">Copy visible table as CSV</button>
+          <button type="button" id="copyTableTsv">Copy visible table as TSV</button>
           <button type="button" class="secondary" id="resetFilters">Reset filters</button>
         </div>
       </div>
@@ -1525,17 +1644,23 @@ function renderHtml(rows: FlatEtfRow[], generatedAt: string, infoText: string): 
     const state = {
       sortKey: "sr5Y",
       sortAsc: false,
+      theme: detectPreferredTheme(),
     };
 
     const RG_PALETTE_STOPS = ["oklch(0.75 0.2 25)", 0xfdf6e3, "oklch(0.75 0.2 143)"]
       .map((value) => rgbToOKLCH(...toArray(value)));
 
     restorePersistedViewState();
+    applyTheme();
     renderHeader();
     bindControls();
     render();
 
     function bindControls() {
+      document.getElementById("themeToggle").addEventListener("click", () => {
+        toggleTheme();
+      });
+
       RENDER_INPUT_IDS.forEach((id) => {
         const element = document.getElementById(id);
         if (id === "searchFilter") {
@@ -1642,6 +1767,9 @@ function renderHtml(rows: FlatEtfRow[], generatedAt: string, infoText: string): 
       if (typeof persisted.sortAsc === "boolean") {
         state.sortAsc = persisted.sortAsc;
       }
+      if (typeof persisted.theme === "string") {
+        state.theme = normalizeTheme(persisted.theme);
+      }
 
       const controls = persisted.controls;
       if (!controls || typeof controls !== "object") {
@@ -1675,6 +1803,36 @@ function renderHtml(rows: FlatEtfRow[], generatedAt: string, infoText: string): 
       }
     }
 
+    function detectPreferredTheme() {
+      return typeof window.matchMedia === "function" && window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+    }
+
+    function normalizeTheme(value) {
+      return value === "dark" ? "dark" : "light";
+    }
+
+    function applyTheme() {
+      document.body.dataset.theme = state.theme;
+      const themeToggle = document.getElementById("themeToggle");
+      if (!themeToggle) {
+        return;
+      }
+
+      const isDark = state.theme === "dark";
+      themeToggle.textContent = isDark ? "Light mode" : "Dark mode";
+      themeToggle.setAttribute("aria-pressed", isDark ? "true" : "false");
+      themeToggle.setAttribute("title", isDark ? "Switch to light mode" : "Switch to dark mode");
+    }
+
+    function toggleTheme() {
+      state.theme = state.theme === "dark" ? "light" : "dark";
+      applyTheme();
+      applyColors(getVisibleRows());
+      persistViewState();
+    }
+
     function persistViewState() {
       try {
         const controls = Object.fromEntries(
@@ -1686,6 +1844,7 @@ function renderHtml(rows: FlatEtfRow[], generatedAt: string, infoText: string): 
         localStorage.setItem(PERSISTENCE_KEY, JSON.stringify({
           sortKey: state.sortKey,
           sortAsc: state.sortAsc,
+          theme: state.theme,
           controls,
         }));
       } catch {
@@ -1956,7 +2115,7 @@ function renderHtml(rows: FlatEtfRow[], generatedAt: string, infoText: string): 
         const key = cell.dataset.key;
         const value = Number(cell.dataset.value);
         if (!key || Number.isNaN(value)) {
-          cell.style.background = "rgba(255,255,255,0.72)";
+          cell.style.background = "var(--cell-empty-bg)";
           cell.style.color = "var(--ink)";
           cell.style.fontWeight = "400";
           return;
@@ -1964,17 +2123,18 @@ function renderHtml(rows: FlatEtfRow[], generatedAt: string, infoText: string): 
 
         const range = columnRanges[key];
         if (!range || range.min === range.max) {
-          cell.style.background = "rgba(255,255,255,0.72)";
+          cell.style.background = "var(--cell-empty-bg)";
           cell.style.color = "var(--ink)";
           cell.style.fontWeight = "400";
           cell.style.textShadow = "none";
           return;
         }
 
-        cell.style.background = getPaletteColor(value, range.min, range.max, !range.higherIsBetter);
-        cell.style.color = "var(--ink)";
+        const paletteColors = getPaletteColors(value, range.min, range.max, !range.higherIsBetter);
+        cell.style.background = paletteColors.bgC;
+        cell.style.color = paletteColors.fgC;
         cell.style.fontWeight = "400";
-        cell.style.textShadow = "0 1px 0 rgba(255,255,255,.35)";
+        cell.style.textShadow = "var(--cell-text-shadow)";
       });
 
       document.querySelectorAll("td[data-hash-text]").forEach((cell) => {
@@ -2206,9 +2366,9 @@ function renderHtml(rows: FlatEtfRow[], generatedAt: string, infoText: string): 
       return [(value >> 16) & 255, (value >> 8) & 255, value & 255];
     }
 
-    function getPaletteColor(value, minValue, maxValue, reverse = false) {
+    function getPaletteColors(value, minValue, maxValue, reverse = false) {
       if (value === null || Number.isNaN(value)) {
-        return "transparent";
+        return { bgC: "transparent", fgC: "var(--ink)" };
       }
       let t = maxValue !== minValue ? (value - minValue) / (maxValue - minValue) : 0;
       t = Math.max(0, Math.min(1, t));
@@ -2228,10 +2388,23 @@ function renderHtml(rows: FlatEtfRow[], generatedAt: string, infoText: string): 
       if (deltaHue < -Math.PI) {
         deltaHue += 2 * Math.PI;
       }
+      const paletteL = start.L + (end.L - start.L) * fraction;
+      const paletteC = start.C + (end.C - start.C) * fraction;
+      const paletteH = start.h + deltaHue * fraction;
+      const [bgR, bgG, bgB] = oklchToRgb(paletteL, paletteC, paletteH);
+      return {
+        bgC: "rgb(" + bgR + "," + bgG + "," + bgB + ")",
+        fgC: state.theme === "dark"
+          ? getPaletteForegroundColor(paletteL, paletteC, paletteH)
+          : "var(--ink)",
+      };
+    }
+
+    function getPaletteForegroundColor(lightness, chroma, hueRadians) {
       const [r, g, b] = oklchToRgb(
-        start.L + (end.L - start.L) * fraction,
-        start.C + (end.C - start.C) * fraction,
-        start.h + deltaHue * fraction,
+        Math.max(0.18, Math.min(0.34, lightness * 0.34)),
+        Math.max(0.02, Math.min(0.09, chroma * 0.55)),
+        hueRadians,
       );
       return "rgb(" + r + "," + g + "," + b + ")";
     }

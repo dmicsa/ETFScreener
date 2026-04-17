@@ -2,11 +2,11 @@
 
 ![ETFScreener screenshot](Code/ETFScreener.png)
 
-If you do not want to generate your own copy, just download `ETFScreener.html` and open it locally in your browser, or even easies use [this link](https://htmlpreview.github.io/?https://github.com/dmicsa/ETFScreener/blob/main/ETFScreener.html).
+If you do not want to generate your own copy, just download `ETFScreener.html` and open it locally in your browser, or, more simply, use [this link](https://htmlpreview.github.io/?https://github.com/dmicsa/ETFScreener/blob/main/ETFScreener.html).
 
-This repository generates a static HTML ETF screener from the full Nasdaq ETF universe.
+This repository generates a static HTML ETF screener from the Nasdaq ETF universe.
 
-The generator code lives in `Code\GenerateETFScreener.ts`. The main output, `ETFScreener.html`, is self-contained: you can open it directly in a browser with no local server, build step, or extra update required.
+The generator code lives in `Code\GenerateETFScreener.ts`. The main output, `ETFScreener.html`, is self-contained: you can open it directly in a browser with no local server, build step, or extra setup required.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ The generator code lives in `Code\GenerateETFScreener.ts`. The main output, `ETF
 
 The current generator uses `yahoo-finance2`, which expects Deno 2.x. Earlier Deno versions may still run, but they are not the supported target.
 
-In this workspace the package can still emit a stale "found 1.40.3" warning even when the actual runtime is Deno 2.x, so confirm the real version with `deno --version` before treating that message as authoritative.
+In this workspace, the package can still emit a stale "found 1.40.3" warning even when the actual runtime is Deno 2.x, so confirm the real version with `deno --version` before treating that message as authoritative.
 
 ## Quick Start
 
@@ -35,7 +35,7 @@ If you want to run the generator without the batch wrapper:
 deno run -A .\Code\GenerateETFScreener.ts
 ```
 
-The generator defaults now write to these root-level files:
+The generator now writes to these root-level files by default:
 
 - `ETFScreener.html`
 - `Code\cache.json`
@@ -44,7 +44,7 @@ The generator defaults now write to these root-level files:
 
 - `--output=<path>`: output HTML file
 - `--cache=<path>`: JSON cache used for enriched ETF data
-- `--symbols=SPY,VOO,QQQ`: optional ticker subset; commas, spaces, tabs, new lines, and other non-ticker separators are all accepted
+- `--symbols=SPY,VOO,QQQ`: optional ticker subset; commas, spaces, tabs, newlines, and other non-ticker separators are all accepted
 
 ## Files In This Repo
 
